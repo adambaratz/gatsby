@@ -54,7 +54,7 @@ async function getContentTypesFromContentful({
 }
 
 export async function createSchemaCustomization(
-  { schema, actions, reporter, cache },
+  { schema, store, actions, reporter, cache },
   pluginOptions
 ) {
   const { createTypes } = actions
@@ -96,9 +96,39 @@ export async function createSchemaCustomization(
     }),
   ]
 
-  const { getGatsbyImageFieldConfig } = await import(
-    `gatsby-plugin-image/graphql-utils`
-  )
+  let getGatsbyImageFieldConfig = null
+  try {
+    const graphqlUtils = await import(`gatsby-plugin-image/graphql-utils`)
+    getGatsbyImageFieldConfig = graphqlUtils.getGatsbyImageFieldConfig
+  } catch (err) {
+    const isYarn = process.env.npm_config_user_agent.includes(`yarn/`)
+
+    let command = `npm install gatsby-plugin-image`
+    if (isYarn) {
+      command = `yarn add gatsby-plugin-image`
+    }
+
+    reporter.panic({
+      id: CODES.GatsbyImageUtils,
+      context: {
+        sourceMessage: `Gatsby-plugin-image is missing from your project.\n\nPlease install it with: ${command}.`,
+      },
+    })
+  }
+
+  // if gatsby-plugin-image is not installed
+  if (
+    !store
+      .getState()
+      .flattenedPlugins.find(plugin => plugin.name === `gatsby-plugin-image`)
+  ) {
+    reporter.panic({
+      id: CODES.GatsbyImageUtils,
+      context: {
+        sourceMessage: `Gatsby-plugin-image is missing from your gatsby-config file.\n\nPlease add "gatsby-plugin-image" to your plugins array.`,
+      },
+    })
+  }
 
   contentfulTypes.push(
     addRemoteFilePolyfillInterface(
@@ -146,7 +176,7 @@ export async function createSchemaCustomization(
               }
             : {}),
         },
-        interfaces: [`ContentfulReference`, `Node`],
+        interfaces: [`ContentfulReference`, `Node`, `RemoteFile`],
       }),
       {
         schema,
