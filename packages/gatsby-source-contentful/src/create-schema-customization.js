@@ -111,7 +111,7 @@ export async function createSchemaCustomization(
     reporter.panic({
       id: CODES.GatsbyImageUtils,
       context: {
-        sourceMessage: `Gatsby-plugin-image is missing from your project.\n\nPlease install it with: ${command}.`,
+        sourceMessage: `gatsby-plugin-image is missing from your project.\n\nPlease install it with: ${command}.`,
       },
     })
   }
@@ -125,7 +125,7 @@ export async function createSchemaCustomization(
     reporter.panic({
       id: CODES.GatsbyImageUtils,
       context: {
-        sourceMessage: `Gatsby-plugin-image is missing from your gatsby-config file.\n\nPlease add "gatsby-plugin-image" to your plugins array.`,
+        sourceMessage: `gatsby-plugin-image is missing from your gatsby-config file.\n\nPlease add "gatsby-plugin-image" to your plugins array.`,
       },
     })
   }
